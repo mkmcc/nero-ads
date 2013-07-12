@@ -28,6 +28,7 @@
 ;;; Code:
 
 (require 'nero)
+(defvar nero-history nil)
 
 ;; prompt for a search string and construct an ADS url
 (nero-defelvis "Nasa ADS"

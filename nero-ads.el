@@ -68,7 +68,7 @@ code is a bit ugly, but the functionality is awesome."
            (let ((biburl (nero-down 'return-link)))
              ;; use url-retrieve here since we don't want any
              ;; processing of the file
-             (url-retrieve test-url
+             (url-retrieve biburl
                            (lambda (status) (nero-ads-copy-bibtex))))
            (message "Copied bibtex entry to kill-ring."))
           (t

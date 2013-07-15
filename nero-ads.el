@@ -55,15 +55,12 @@
 
 ;; functions to automatically find ADS bibtex entries
 ;;
-(defvar ads-scratch-buffer "*ADS scratch*")
-
 (defun ads/absurl-to-biburl (abs-url)
   "Take the URL of an ADS abstract page and return a URL for the
 corresponding bibtex entry.  Return nil if not found."
-  (with-current-buffer ads-scratch-buffer
-    (erase-buffer)
+  (with-temp-buffer
     ; use lynx -dump to parse the html, find links, etc.
-    (call-process "lynx" nil ads-scratch-buffer nil "-dump" abs-url)
+    (call-process "lynx" nil t nil "-dump" abs-url)
     (goto-char (point-min))
     ; look for, e.g. "[25]Bibtex entry for this abstract"
     (when (re-search-forward "\\[\\([0-9]+\\)\\]Bibtex" nil t)
@@ -79,10 +76,9 @@ corresponding bibtex entry.  Return nil if not found."
   "Take the URL for an ADS bibtex entry and return the entry as a
 string.  Optionally, replace the default (and useless) ADS label
 with the argument NEW-LABEL."
-  (with-current-buffer ads-scratch-buffer
-    (erase-buffer)
+  (with-temp-buffer
     ; lynx -source doesn't process the text at all
-    (call-process "lynx" nil ads-scratch-buffer nil "-source" bib-url)
+    (call-process "lynx" nil t nil "-source" bib-url)
     ; first, look for a bibtex definition and replace the label if
     ; appropriate.
     (goto-char (point-min))

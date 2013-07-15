@@ -23,7 +23,7 @@
 ;;
 ;; 1. `nero-slurp-bibtex' calls lynx directly, rather than going
 ;;    through the nero interface.  This means it won't affect the nero
-;;    timescale at all, which I think is a good thing.
+;;    "time-scape", which I think is a good thing.
 ;;
 ;; 2. Since `nero-slurp-bibtex' calls lynx synchronously, you have to
 ;;    wait for the pages to download before you can continue working.

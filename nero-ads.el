@@ -18,7 +18,7 @@
 ;;     retrieves the bibtex entry.  also prompts for an optional
 ;;     bibtex label to replace the default NASA one.  This command is
 ;;     bound to 'z'.
-;;
+
 ;; Notes:
 ;;
 ;; 1. `nero-slurp-bibtex' calls lynx directly, rather than going
@@ -40,6 +40,11 @@
 ;;   z 7 RET Quataert2008 RET
 ;;   C-x b paper.bib
 ;;   C-y
+
+;; TODO:
+;;
+;; 1. make nero-slurp-bibtex guess new-label from context?  maybe that
+;;    functionality really belongs in ads/biburl-to-bib...
 
 ;;; Code:
 
@@ -95,7 +100,17 @@ with the argument NEW-LABEL."
                 (buffer-substring bpoint (point)))))))
 
 (defun nero-slurp-bibtex (&optional link-number new-label)
-  ""
+  "Automatically find the bibtex entry for an abstract in the
+NASA ADS database.
+
+This function is rather specific -- it presumes you've used
+`nero-query-nasa-ads' to search ADS for an abstract.  Then, you
+can call this function from the *Nero* buffer.  It will prompt
+for the number in front of the abstract you want, then will find
+the bibtex entry and save it to the kill ring.
+
+The functions `ads/absurl-to-biburl' and `ads/biburl-to-bib' are
+more general.  Specifically, they don't depend on nero at all."
   (interactive (list (read-string "Slurp bibtex from Link Number: ")
                      (read-string "New label: ")))
   (let* ((abs-url (nero-follow-link-internal link-number 'return-link nil t))
@@ -110,6 +125,6 @@ with the argument NEW-LABEL."
 (eval-after-load 'nero
   '(define-key nero-mode-map (kbd "z") 'nero-slurp-bibtex))
 
-
 (provide 'nero-ads)
+
 ;;; nero-ads.el ends here

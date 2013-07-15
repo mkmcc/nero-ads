@@ -15,13 +15,29 @@
 ;;     *Nero* buffer.
 ;;
 ;; 2. `nero-slurp-bibtex': prompts for a link number and automatically
-;;     retrieves the bibtex entry.  This command is bound to 'z'.
+;;     retrieves the bibtex entry.  also prompts for an optional
+;;     bibtex label to replace the default NASA one.  This command is
+;;     bound to 'z'.
+;;
+;; Notes:
+;;
+;; 1. `nero-slurp-bibtex' calls lynx directly, rather than going
+;;    through the nero interface.  This means it won't affect the nero
+;;    timescale at all, which I think is a good thing.
+;;
+;; 2. Since `nero-slurp-bibtex' calls lynx synchronously, you have to
+;;    wait for the pages to download before you can continue working.
+;;    This is different from the way nero works, but it fits my usage
+;;    pattern at least: when I call `nero-slurp-bibtex', I usually
+;;    want to yank the result into my bib database immediately.  Also,
+;;    the NASA ADS system is fast enough that waiting for it hasn't
+;;    really annoyed me yet.
 
 ;; Example usage: insert the bibtex entry for Quataert (2008) into
 ;; paper.bib
 ;;
 ;;   M-x nero-query-nasa-ads RET ^Quataert 2008 RET
-;;   z 7 RET
+;;   z 7 RET Quataert2008 RET
 ;;   C-x b paper.bib
 ;;   C-y
 

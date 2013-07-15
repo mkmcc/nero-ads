@@ -28,7 +28,7 @@
 ;;; Code:
 
 (require 'nero)
-(defvar nero-history nil)
+(defvar nero-history nil)               ; not sure why this is needed...
 
 ;; prompt for a search string and construct an ADS url
 (nero-defelvis "Nasa ADS"
@@ -36,48 +36,68 @@
   "%20"
   "&version=1")
 
-(defun nero-ads-copy-bibtex ()
-  "Extract the bibtex definition from a nero buffer and save it
-to the kill ring.
 
-This function only works inside a buffer displaying the bibtex
-entry -- it's just a helper function for `nero-slurp-bibtex'"
-  (save-excursion
+;; functions to automatically find ADS bibtex entries
+;;
+(defvar ads-scratch-buffer "*ADS scratch*")
+
+(defun ads/absurl-to-biburl (abs-url)
+  "Take the URL of an ADS abstract page and return a URL for the
+corresponding bibtex entry.  Return nil if not found."
+  (with-current-buffer ads-scratch-buffer
+    (erase-buffer)
+    ; use lynx -dump to parse the html, find links, etc.
+    (call-process "lynx" nil ads-scratch-buffer nil "-dump" abs-url)
     (goto-char (point-min))
-    (re-search-forward "\\(@\\w+\\)")
-    (let ((front (match-string-no-properties 1))
-          (bpoint (point)))
-      (forward-sexp 1)
-      (kill-new (concat
-                 front
-                 (buffer-substring-no-properties bpoint (point)))))))
+    ; look for, e.g. "[25]Bibtex entry for this abstract"
+    (when (re-search-forward "\\[\\([0-9]+\\)\\]Bibtex" nil t)
+      ; look for, e.g. " 25. http://..."
+      (let ((bib-link-regexp
+             (concat "^\\s-*" (match-string-no-properties 1)
+                     "\\.\\s-*\\(.+\\)$")))
+        (re-search-forward "^References$")
+        (re-search-forward bib-link-regexp)
+        (match-string-no-properties 1)))))
 
-(defun nero-slurp-bibtex (&optional link-number)
-  "Read a link number and save the corresponding bibtex entry to the kill-ring.
+(defun ads/biburl-to-bib (bib-url &optional new-label)
+  "Take the URL for an ADS bibtex entry and return the entry as a
+string.  Optionally, replace the default (and useless) ADS label
+with the argument NEW-LABEL."
+  (with-current-buffer ads-scratch-buffer
+    (erase-buffer)
+    ; lynx -source doesn't process the text at all
+    (call-process "lynx" nil ads-scratch-buffer nil "-source" bib-url)
+    ; first, look for a bibtex definition and replace the label if
+    ; appropriate.
+    (goto-char (point-min))
+    (when (re-search-forward "@\\sw+{\\([^,]+\\)," nil t)
+      (when (and new-label (not (string-equal new-label "")))
+        (replace-match new-label t t nil 1))
+      ; next, find the definition and return it.  use the nifty
+      ; function `forward-sexp' to navigate to the end.
+      (goto-char (point-min))
+      (re-search-forward "@\\sw+")
+      (let ((bpoint (point)))
+        (forward-sexp)
+        (concat (match-string-no-properties 0)
+                (buffer-substring bpoint (point)))))))
 
-The link you provide should point to an ADS \"abstract\" page.
-So you'd use this from, e.g. a page listing search results.  This
-code is a bit ugly, but the functionality is awesome."
-  (interactive (list (read-string "Slurp bibtex from Link Number: ")))
-  (let ((url (nero-follow-link-internal link-number 'return-link nil t)))
-    ;; use nero to browse this url since it parses links automatically
-    (nero-browse-url url nil nil nil
-       (lambda ()
-         (cond
-          ((search-forward "Bibtex" nil t)
-           (nero-move-to-previous-link)
-           (let ((biburl (nero-down 'return-link)))
-             ;; use url-retrieve here since we don't want any
-             ;; processing of the file
-             (url-retrieve biburl
-                           (lambda (status) (nero-ads-copy-bibtex))))
-           (message "Copied bibtex entry to kill-ring."))
-          (t
-           (message "Couldn't find bibtex entry."))))
-       t)))
+(defun nero-slurp-bibtex (&optional link-number new-label)
+  ""
+  (interactive (list (read-string "Slurp bibtex from Link Number: ")
+                     (read-string "New label: ")))
+  (let* ((abs-url (nero-follow-link-internal link-number 'return-link nil t))
+         (bib-url (ads/absurl-to-biburl abs-url)))
+    (cond
+     ((eq bib-url nil)
+      (message "Couldn't find link to bibtex entry."))
+     (t
+      (kill-new (ads/biburl-to-bib bib-url new-label))
+      (message "Saved bibtex entry to kill-ring.")))))
 
 (eval-after-load 'nero
   '(define-key nero-mode-map (kbd "z") 'nero-slurp-bibtex))
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 
 (provide 'nero-ads)
+;;; nero-ads.el ends here

@@ -33,18 +33,19 @@
 ;;    the NASA ADS system is fast enough that waiting for it hasn't
 ;;    really annoyed me yet.
 
-;; Example usage: insert the bibtex entry for Quataert (2008) into
-;; paper.bib
-;;
-;;   M-x nero-query-nasa-ads RET ^Quataert 2008 RET
-;;   z 7 RET Quataert2008 RET
-;;   C-x b paper.bib
-;;   C-y
-
 ;; TODO:
 ;;
 ;; 1. make nero-slurp-bibtex guess new-label from context?  maybe that
 ;;    functionality really belongs in ads/biburl-to-bib...
+
+;; Example usage:
+;;
+;; 1. insert the bibtex entry for Quataert (2008) into paper.bib
+;;
+;;    M-x nero-query-nasa-ads RET ^Quataert 2008 RET
+;;    z 7 RET Quataert2008 RET
+;;    C-x b paper.bib
+;;    C-y
 
 ;;; Code:
 

@@ -1,4 +1,12 @@
-(require 's)
+(defun collapse-whitespace (s)
+  "Convert all adjacent whitespace characters to a single space."
+  (replace-regexp-in-string "[ \t\n\r]+" " " s))
+
+(defun ads-assert (test name)
+  (if test
+      t
+    (message "nero-ads: %s failed." name)
+    nil))
 
 (let ((test-abs "http://adsabs.harvard.edu/abs/2012MNRAS.419.3319M")
       (test-bib "http://adsabs.harvard.edu/cgi-bin/nph-bib_query?bibcode=2012MNRAS.419.3319M&data_type=BIBTEX&db_key=AST&nocookieset=1")
@@ -38,19 +46,25 @@ archivePrefix = \"arXiv\",
   adsnote = {Provided by the SAO/NASA Astrophysics Data System}
 }"))
 
-
-  (unless (string-equal (ads/absurl-to-biburl test-abs) test-bib)
-    (message "test 1 failed."))
-  (unless (eq (ads/absurl-to-biburl "http://www.google.com") nil)
-    (message "test 2 failed."))
-
-  (unless (string-equal
-           (s-collapse-whitespace (ads/biburl-to-bib test-bib))
-           (s-collapse-whitespace test-bib-entry))
-    (message "test 3 failed."))
-  (unless (string-equal
-           (s-collapse-whitespace (ads/biburl-to-bib test-bib test-label))
-           (s-collapse-whitespace test-bib-entry-alt))
-    (message "test 4 failed."))
-  (unless (eq (ads/biburl-to-bib "http://www.google.com") nil)
-    (message "test 5 failed.")))
+  (if (and
+       (ads-assert
+        (string-equal (ads/absurl-to-biburl test-abs) test-bib)
+        "correct absurl-to-biburl")
+       (ads-assert
+        (eq (ads/absurl-to-biburl "http://www.google.com") nil)
+        "incorrect absurl-to-biburl")
+       (ads-assert
+        (string-equal
+         (collapse-whitespace (ads/biburl-to-bib test-bib))
+         (collapse-whitespace test-bib-entry))
+        "correct biburl-to-bib without label replacement")
+       (ads-assert
+        (string-equal
+         (collapse-whitespace (ads/biburl-to-bib test-bib test-label))
+         (collapse-whitespace test-bib-entry-alt))
+        "correct biburl-to-bib with label replacement")
+       (ads-assert
+        (eq (ads/biburl-to-bib "http://www.google.com") nil)
+        "incorrect biburl-to-bib"))
+      (message "nero-ads: all tests succeeded.")
+    (message "nero-ads: tests failed.")))

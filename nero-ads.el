@@ -50,7 +50,7 @@
 ;;; Code:
 
 (require 'nero)
-(defvar nero-history nil)               ; not sure why this is needed...
+(defvar nero-history nil)      ; I think this is a bug in nero.el (??)
 
 ;; prompt for a search string and construct an ADS url
 ;;;###autoload

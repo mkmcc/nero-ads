@@ -53,10 +53,12 @@
 (defvar nero-history nil)               ; not sure why this is needed...
 
 ;; prompt for a search string and construct an ADS url
-(nero-defelvis "Nasa ADS"
-  "http://adsabs.harvard.edu/cgi-bin/nph-basic_connect?qsearch="
-  "%20"
-  "&version=1")
+;;;###autoload
+(eval-after-load 'nero
+  '(nero-defelvis "Nasa ADS"
+     "http://adsabs.harvard.edu/cgi-bin/nph-basic_connect?qsearch="
+     "%20"
+     "&version=1"))
 
 
 ;; functions to automatically find ADS bibtex entries
@@ -100,6 +102,7 @@ with the argument NEW-LABEL."
         (concat (match-string-no-properties 0)
                 (buffer-substring bpoint (point)))))))
 
+;;;###autoload
 (defun nero-slurp-bibtex (&optional link-number new-label)
   "Automatically find the bibtex entry for an abstract in the
 NASA ADS database.
@@ -123,6 +126,7 @@ more general.  Specifically, they don't depend on nero at all."
       (kill-new (ads/biburl-to-bib bib-url new-label))
       (message "Saved bibtex entry to kill-ring.")))))
 
+;;;###autoload
 (eval-after-load 'nero
   '(define-key nero-mode-map (kbd "z") 'nero-slurp-bibtex))
 

@@ -1,0 +1,52 @@
+;;; nero-ads.el --- utilities to query NASA ADS from within emacs
+
+;; Copyright (c) 2013 Mike McCourt (mkmcc@berkeley.edu)
+;;
+
+;;; Commentary:
+
+;; Extends the incredibly useful nero.el (code.google.com/p/nero-el)
+;; to interact with NASA's Astrophysics Data System (ADS).
+;;
+;; Provides two interactive functions:
+;;
+;; 1. `nero-query-nasa-ads': prompts for a search string and passes
+;;     the query onto ADS automatically.  shows the results in the
+;;     *Nero* buffer.
+;;
+;; 2. `nero-slurp-bibtex': prompts for a link number and automatically
+;;     retrieves the bibtex entry.  also prompts for an optional
+;;     bibtex label to replace the default NASA one.  This command is
+;;     bound to 'z'.
+
+;; Notes:
+;;
+;; 1. `nero-slurp-bibtex' calls lynx directly, rather than going
+;;    through the nero interface.  This means it won't affect the nero
+;;    "time-scape", which I think is a good thing.
+;;
+;; 2. Since `nero-slurp-bibtex' calls lynx synchronously, you have to
+;;    wait for the pages to download before you can continue working.
+;;    This is different from the way nero works, but it fits my usage
+;;    pattern at least: when I call `nero-slurp-bibtex', I usually
+;;    want to yank the result into my bib database immediately.  Also,
+;;    the NASA ADS system is fast enough that waiting for it hasn't
+;;    really annoyed me yet.
+
+;; TODO:
+;;
+;; 1. make nero-slurp-bibtex guess new-label from context?  maybe that
+;;    functionality really belongs in ads/biburl-to-bib...
+
+;; Example usage:
+;;
+;; 1. insert the bibtex entry for Quataert (2008) into paper.bib
+;;
+;;    M-x nero-query-nasa-ads RET ^Quataert 2008 RET
+;;    z 7 RET Quataert2008 RET
+;;    C-x b paper.bib
+;;    C-y
+
+I think this works pretty well, but I don't plan to develop this any
+longer.  I've started over with bibslurp.el, which doesn't depend on
+nero.el and is more self-contained.  I'd recommend using that.
